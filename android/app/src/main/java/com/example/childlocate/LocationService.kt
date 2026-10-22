@@ -12,30 +12,34 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 /**
- * Foreground service that reports this device's location to the configured
- * server. It runs with a permanent, visible notification — Android requires
- * this for background location, and it also keeps the app honest: whoever uses
- * the phone can see that location sharing is on.
+ * Foreground service that answers on-demand location requests.
+ *
+ * It does NOT track continuously. Every POLL_MS it asks the server whether a
+ * family member has requested a location ("Check location" on the dashboard).
+ * Only when a request is pending does it turn on GPS, get a single fix, and
+ * send it. A permanent, visible notification is shown the whole time — Android
+ * requires it, and it keeps the app honest.
  */
 class LocationService : Service() {
 
     private lateinit var locationManager: LocationManager
+    private val mainHandler = Handler(Looper.getMainLooper())
 
-    private val listener = object : LocationListener {
-        override fun onLocationChanged(location: Location) = report(location)
-        // Deprecated no-op overrides kept for older platforms.
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
-    }
+    @Volatile
+    private var running = false
+    private var pollThread: Thread? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -45,26 +49,92 @@ class LocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundNotification()
-        requestUpdates()
+        if (!running) {
+            running = true
+            pollThread = thread(name = "location-poll") { pollLoop() }
+        }
         return START_STICKY
     }
 
-    private fun requestUpdates() {
+    private fun pollLoop() {
+        while (running) {
+            try {
+                if (checkPending()) fetchAndSendOnce()
+            } catch (_: Exception) {
+            }
+            try {
+                Thread.sleep(POLL_MS)
+            } catch (_: InterruptedException) {
+                break
+            }
+        }
+    }
+
+    /** Returns true only while the parent has a pending request on the server. */
+    private fun checkPending(): Boolean {
+        val server = Prefs.server(this).trimEnd('/')
+        val key = Prefs.deviceKey(this)
+        if (server.isEmpty() || key.isEmpty()) return false
+        return try {
+            val url = URL("$server/api/request?key=" + URLEncoder.encode(key, "UTF-8"))
+            val conn = (url.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 10000
+                readTimeout = 10000
+            }
+            val text = conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
+            conn.disconnect()
+            text.contains("\"pending\":true")
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Turn on GPS just long enough for one fresh location, then send it. */
+    private fun fetchAndSendOnce() {
         try {
-            for (provider in listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)) {
-                if (locationManager.isProviderEnabled(provider)) {
-                    locationManager.requestLocationUpdates(
-                        provider,
-                        INTERVAL_MS,
-                        MIN_DISTANCE_M,
-                        listener
-                    )
-                    locationManager.getLastKnownLocation(provider)?.let(::report)
+            // Fast answer: last known location, if we have one.
+            for (p in listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)) {
+                if (locationManager.isProviderEnabled(p)) {
+                    locationManager.getLastKnownLocation(p)?.let(::report)
                 }
             }
-        } catch (e: SecurityException) {
-            // Location permission not granted — stop quietly.
-            stopSelf()
+
+            val provider = when {
+                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ->
+                    LocationManager.GPS_PROVIDER
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ->
+                    LocationManager.NETWORK_PROVIDER
+                else -> return
+            }
+
+            val oneShot = object : LocationListener {
+                override fun onLocationChanged(location: Location) {
+                    report(location)
+                    try {
+                        locationManager.removeUpdates(this)
+                    } catch (_: Exception) {
+                    }
+                }
+
+                override fun onProviderEnabled(provider: String) {}
+                override fun onProviderDisabled(provider: String) {}
+            }
+
+            // Location updates must be requested on a thread with a Looper.
+            mainHandler.post {
+                try {
+                    locationManager.requestLocationUpdates(provider, 0L, 0f, oneShot, Looper.getMainLooper())
+                    // Stop listening after 30s even if no fix arrived.
+                    mainHandler.postDelayed({
+                        try {
+                            locationManager.removeUpdates(oneShot)
+                        } catch (_: Exception) {
+                        }
+                    }, 30_000)
+                } catch (_: SecurityException) {
+                }
+            }
+        } catch (_: SecurityException) {
         }
     }
 
@@ -98,7 +168,7 @@ class LocationService : Service() {
                 conn.inputStream.use { it.readBytes() }
                 conn.disconnect()
             } catch (_: Exception) {
-                // Network hiccup — the next location update will try again.
+                // Network hiccup — the next request will try again.
             }
         }
     }
@@ -122,7 +192,7 @@ class LocationService : Service() {
             CHANNEL_ID,
             "Location sharing",
             NotificationManager.IMPORTANCE_LOW
-        ).apply { description = "Shown while this device is sharing its location." }
+        ).apply { description = "Shown while this device can answer location requests." }
         mgr.createNotificationChannel(channel)
     }
 
@@ -135,7 +205,7 @@ class LocationService : Service() {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Location sharing is on")
-            .setContentText("This phone is sharing its location with a family member.")
+            .setContentText("Location is shared only when a family member requests it.")
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setOngoing(true)
             .setContentIntent(openApp)
@@ -149,10 +219,8 @@ class LocationService : Service() {
     }
 
     override fun onDestroy() {
-        try {
-            locationManager.removeUpdates(listener)
-        } catch (_: Exception) {
-        }
+        running = false
+        pollThread?.interrupt()
         super.onDestroy()
     }
 
@@ -161,8 +229,7 @@ class LocationService : Service() {
     companion object {
         private const val CHANNEL_ID = "location_sharing"
         private const val NOTIF_ID = 1
-        private const val INTERVAL_MS = 120_000L // ~2 minutes
-        private const val MIN_DISTANCE_M = 0f
+        private const val POLL_MS = 15_000L // check for a request every 15s
 
         fun start(ctx: Context) {
             val intent = Intent(ctx, LocationService::class.java)

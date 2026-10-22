@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Family Locate</string>
-    <string name="intro">Shares this phone\'s location with a family member. While it is on, a notification stays visible so everyone using this phone knows.</string>
+    <string name="intro">Lets a family member see this phone\'s location only when they ask for it. Nothing is sent otherwise. While it is on, a notification stays visible so everyone using this phone knows.</string>
 
     <string name="label_server">Server address</string>
     <string name="hint_server">https://your-domain.com</string>
@@ -13,7 +13,7 @@
     <string name="start">Start sharing location</string>
     <string name="stop">Stop sharing</string>
 
-    <string name="sharing_on">Location sharing is ON.</string>
+    <string name="sharing_on">ON — this phone will answer location requests.</string>
     <string name="sharing_off">Location sharing is off.</string>
     <string name="fill_fields">Please fill in the server and key.</string>
     <string name="bad_url">Server must start with http:// or https://</string>

@@ -90,8 +90,9 @@ For background location on a phone (e.g. a parent keeping track of a child's
 phone, with the child's knowledge), a native Android app is included under
 `android/`. It:
 
-- Runs a **foreground service** that reports location to your server every
-  ~2 minutes, and restarts after reboot.
+- Runs a **foreground service** that answers location **on demand**: it only
+  turns on GPS and sends a location when you tap **Check location** on the
+  dashboard. Otherwise nothing is captured or sent. Restarts after reboot.
 - Shows a **permanent notification** the whole time it's sharing. The app does
   not hide itself and can be stopped from its own screen. This is required by
   Android and keeps the app honest — it is meant for your own device, or a

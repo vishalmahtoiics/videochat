@@ -28,19 +28,45 @@ function timeAgo(ts) {
   return `${Math.round(s / 3600)} h ago`;
 }
 
+function show(loc, metaEl) {
+  metaEl.innerHTML =
+    `Updated ${timeAgo(loc.ts)} · ±${Math.round(loc.accuracy || 0)}m<br />` +
+    `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`;
+}
+
+async function latest(key) {
+  const res = await fetch(`/api/location?key=${encodeURIComponent(key)}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error();
+  return res.json();
+}
+
+// Ask the phone to report now, then wait for a fresh point to arrive.
 async function check(device, metaEl) {
-  metaEl.textContent = "Checking…";
+  metaEl.textContent = "Requesting the phone…";
   try {
-    const res = await fetch(`/api/location?key=${encodeURIComponent(device.key)}`);
-    if (res.status === 404) {
-      metaEl.textContent = "No location shared yet (phone app not running?).";
-      return;
+    const before = await latest(device.key).catch(() => null);
+    const baseTs = before ? before.ts : 0;
+
+    await fetch("/api/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: device.key }),
+    });
+
+    // Poll for a newer location than we had before (phone answers within ~15s).
+    const deadline = Date.now() + 45000;
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 3000));
+      const loc = await latest(device.key).catch(() => null);
+      if (loc && loc.ts > baseTs) {
+        show(loc, metaEl);
+        return;
+      }
+      metaEl.textContent = "Waiting for the phone to respond…";
     }
-    if (!res.ok) throw new Error();
-    const loc = await res.json();
-    metaEl.innerHTML =
-      `Last seen ${timeAgo(loc.ts)} · ±${Math.round(loc.accuracy || 0)}m<br />` +
-      `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`;
+    metaEl.textContent =
+      "No response yet. Make sure the app is installed, open at least once, and online.";
   } catch {
     metaEl.textContent = "Couldn't reach the server.";
   }

@@ -18,6 +18,12 @@ app.use(express.static(join(__dirname, "public")));
 // a Stop button while it is sharing.
 const locations = new Map();
 
+// Pending on-demand requests: key -> timestamp the parent asked. The phone
+// only captures and sends a location when it sees a pending request, so
+// nothing is tracked unless the parent clicks "Check location".
+const requests = new Map();
+const REQUEST_WINDOW_MS = 3 * 60 * 1000; // a request stays pending up to 3 min
+
 app.post("/api/location", (req, res) => {
   const { key, lat, lng, accuracy, name } = req.body || {};
   if (!key || typeof lat !== "number" || typeof lng !== "number") {
@@ -30,7 +36,26 @@ app.post("/api/location", (req, res) => {
     name: typeof name === "string" ? name : "",
     ts: Date.now(),
   });
+  // A fresh location answers the request, so clear it.
+  requests.delete(String(key));
   res.json({ ok: true });
+});
+
+// Parent asks the phone to report its location now.
+app.post("/api/request", (req, res) => {
+  const key = String(req.body?.key || "");
+  if (!key) return res.status(400).json({ error: "key required" });
+  requests.set(key, Date.now());
+  res.json({ ok: true });
+});
+
+// The phone polls this; true only while a recent request is pending.
+app.get("/api/request", (req, res) => {
+  const key = String(req.query.key || "");
+  const ts = requests.get(key);
+  const pending = !!ts && Date.now() - ts < REQUEST_WINDOW_MS;
+  if (ts && !pending) requests.delete(key);
+  res.json({ pending });
 });
 
 app.get("/api/location", (req, res) => {
