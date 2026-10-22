@@ -55,13 +55,13 @@ class MainActivity : AppCompatActivity() {
         keyField.setText(Prefs.deviceKey(this))
         nameField.setText(Prefs.name(this))
 
-        findViewById<Button>(R.id.start).setOnClickListener { onStart() }
-        findViewById<Button>(R.id.stop).setOnClickListener { onStop() }
+        findViewById<Button>(R.id.start).setOnClickListener { onStartClicked() }
+        findViewById<Button>(R.id.stop).setOnClickListener { onStopClicked() }
 
         refreshStatus()
     }
 
-    private fun onStart() {
+    private fun onStartClicked() {
         val server = serverField.text.toString().trim()
         val key = keyField.text.toString().trim()
         val name = nameField.text.toString().trim()
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun onStop() {
+    private fun onStopClicked() {
         Prefs.setEnabled(this, false)
         LocationService.stop(this)
         refreshStatus()
