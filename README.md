@@ -57,6 +57,26 @@ Media is sent peer-to-peer. A public STUN server
 between restrictive networks you may also need a TURN server, which you can add
 to `ICE_SERVERS` in `public/app.js`.
 
+## Location sharing (find-my-phone)
+
+A small, consent-first location feature is included for tracking **your own**
+phone (or a device whose owner knowingly installs it):
+
+- On the phone, open `/share`, enter a private key, and tap **Start sharing**.
+  The browser asks for GPS permission; a banner stays visible the whole time.
+- On any other device, open `/track?key=YOUR_KEY` to see the phone live on a
+  map (OpenStreetMap).
+- Sharing stops when you tap **Stop** or close the tab. Nothing is tracked
+  silently — the phone always shows it is sharing.
+
+On Android you can open `/share` in Chrome and use **Add to Home screen** to
+get an app-like icon. (A browser page shares location only while open; true
+always-on background tracking would require a native app with a persistent
+notification — not included here.)
+
+The key keeps a device's location private to whoever holds it; locations are
+kept only in memory and dropped when sharing stops.
+
 ## License
 
 MIT
