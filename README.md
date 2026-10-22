@@ -77,6 +77,50 @@ notification — not included here.)
 The key keeps a device's location private to whoever holds it; locations are
 kept only in memory and dropped when sharing stops.
 
+### Parent dashboard
+
+`/dashboard` is a simple parent view: add a device (a name + the same private
+key set on the phone), then tap **Check location** to see its latest point, or
+**Open live map**. Devices are stored only in your browser (localStorage), not
+on the server.
+
+## Native Android app (`android/`)
+
+For background location on a phone (e.g. a parent keeping track of a child's
+phone, with the child's knowledge), a native Android app is included under
+`android/`. It:
+
+- Runs a **foreground service** that reports location to your server every
+  ~2 minutes, and restarts after reboot.
+- Shows a **permanent notification** the whole time it's sharing. The app does
+  not hide itself and can be stopped from its own screen. This is required by
+  Android and keeps the app honest — it is meant for your own device, or a
+  child's device with their knowledge, not covert tracking.
+
+### Building the APK (no Android Studio needed)
+
+A GitHub Actions workflow (`.github/workflows/android.yml`) builds the APK for
+you:
+
+1. Push the `android/` folder (already set up in this repo).
+2. On GitHub, open the **Actions** tab → the **Build Android APK** run.
+3. Download the **`family-locate-debug-apk`** artifact — it contains
+   `app-debug.apk`.
+4. Copy it to the phone and install (you'll need to allow "install from unknown
+   sources").
+
+You can also build locally with Android Studio: open the `android/` folder and
+use **Build → Build APK**.
+
+### Setting it up on the phone
+
+1. Install and open the app.
+2. Enter your **server address** (e.g. `https://your-domain.com`), a **private
+   key**, and an optional device name, then tap **Start sharing location**.
+3. Grant location permission, and choose **Allow all the time** so it works
+   while the app is closed.
+4. On your own device, open `/dashboard` and add the same key to see it.
+
 ## License
 
 MIT

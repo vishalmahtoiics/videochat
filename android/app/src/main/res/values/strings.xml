@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Family Locate</string>
+    <string name="intro">Shares this phone\'s location with a family member. While it is on, a notification stays visible so everyone using this phone knows.</string>
+
+    <string name="label_server">Server address</string>
+    <string name="hint_server">https://your-domain.com</string>
+    <string name="label_key">Private key</string>
+    <string name="hint_key">e.g. my-phone-7k2p</string>
+    <string name="label_name">Device name (optional)</string>
+    <string name="hint_name">e.g. Aarav\'s phone</string>
+
+    <string name="start">Start sharing location</string>
+    <string name="stop">Stop sharing</string>
+
+    <string name="sharing_on">Location sharing is ON.</string>
+    <string name="sharing_off">Location sharing is off.</string>
+    <string name="fill_fields">Please fill in the server and key.</string>
+    <string name="bad_url">Server must start with http:// or https://</string>
+    <string name="need_location">Location permission is needed to share location.</string>
+    <string name="pick_all_the_time">For sharing while the app is closed, choose \"Allow all the time\".</string>
+
+    <string name="privacy">This app does not hide itself. A notification is always shown while sharing, and sharing can be stopped from this screen at any time. Intended for sharing your own device, or a child\'s device with their knowledge.</string>
+</resources>

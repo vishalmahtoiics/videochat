@@ -19,7 +19,7 @@ app.use(express.static(join(__dirname, "public")));
 const locations = new Map();
 
 app.post("/api/location", (req, res) => {
-  const { key, lat, lng, accuracy } = req.body || {};
+  const { key, lat, lng, accuracy, name } = req.body || {};
   if (!key || typeof lat !== "number" || typeof lng !== "number") {
     return res.status(400).json({ error: "key, lat and lng are required" });
   }
@@ -27,6 +27,7 @@ app.post("/api/location", (req, res) => {
     lat,
     lng,
     accuracy: typeof accuracy === "number" ? accuracy : null,
+    name: typeof name === "string" ? name : "",
     ts: Date.now(),
   });
   res.json({ ok: true });
