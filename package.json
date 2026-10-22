@@ -1,0 +1,19 @@
+{
+  "name": "videochat",
+  "version": "1.0.0",
+  "description": "Consent-first 1:1 video and audio chat over WebRTC.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "4.21.2",
+    "socket.io": "4.8.1"
+  },
+  "license": "MIT"
+}
