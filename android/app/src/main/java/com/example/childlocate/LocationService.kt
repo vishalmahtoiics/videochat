@@ -117,7 +117,7 @@ class LocationService : Service() {
     }
 
     private fun createChannel() {
-        val mgr = getSystemService(NotificationManager::class.java)
+        val mgr = getSystemService(NotificationManager::class.java) ?: return
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Location sharing",
