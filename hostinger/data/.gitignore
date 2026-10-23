@@ -1,0 +1,4 @@
+# Stored location/request files are runtime data — don't commit them.
+*
+!.gitignore
+!.htaccess

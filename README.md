@@ -122,6 +122,37 @@ use **Build → Build APK**.
    while the app is closed.
 4. On your own device, open `/dashboard` and add the same key to see it.
 
+## Deploying on shared hosting without Node (`hostinger/`)
+
+If your host (e.g. Hostinger shared hosting) only runs PHP, use the `hostinger/`
+folder — a PHP version of the location backend. It needs no Node and works on
+standard LAMP/LiteSpeed hosting. (The video-chat feature needs Node and is not
+part of this bundle; location sharing is.)
+
+The already-built Android APK works against it unchanged: an `.htaccess` maps
+the clean `/api/location` and `/api/request` paths to the PHP files.
+
+**Upload steps:**
+
+1. Download the repo (Code → Download ZIP) and open the `hostinger/` folder.
+2. Upload **the contents of `hostinger/`** (not the folder itself) into your
+   site's `public_html` via hPanel → File Manager. You should end up with
+   `public_html/index.html`, `public_html/api/…`, `public_html/.htaccess`, etc.
+3. Make sure the `data/` folder is writable (the PHP creates it automatically;
+   if needed set it to 755).
+4. Open `https://your-domain.com` — you should see the Family Locate page.
+
+**Then:**
+
+- In the Android app, set the server to `https://your-domain.com` and a private
+  key, and tap Start.
+- Open `https://your-domain.com/dashboard`, add the same key, and tap **Check
+  location**.
+
+Stored location/request files live in `hostinger/data/` and are blocked from
+direct web access by an `.htaccess`; they're only served (to someone who knows
+the key) through the API.
+
 ## License
 
 MIT

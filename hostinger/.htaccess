@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# API endpoints — these clean paths are what the Android app and the web
+# pages call; map them to the PHP files.
+RewriteRule ^api/location/stop/?$ api/stop.php [L,QSA]
+RewriteRule ^api/location/?$ api/location.php [L,QSA]
+RewriteRule ^api/request/?$ api/request.php [L,QSA]
+
+# Pretty page URLs
+RewriteRule ^dashboard/?$ dashboard.html [L]
+RewriteRule ^track/?$ track.html [L]
+RewriteRule ^share/?$ share.html [L]
