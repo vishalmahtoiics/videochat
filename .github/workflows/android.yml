@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [videochat-app]
+    branches: [master, videochat-app]
     paths:
       - "android/**"
       - ".github/workflows/android.yml"
