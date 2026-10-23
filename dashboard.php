@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/auth.php';
+require_login();
+?>
 <!doctype html>
 <html lang="en">
   <head>
@@ -44,6 +48,16 @@
         border-radius: 8px;
         font-weight: 600;
       }
+      .logout {
+        text-align: right;
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+      .logout a {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
     </style>
   </head>
   <body>
@@ -51,6 +65,8 @@
       <h1>Family dashboard</h1>
       <p class="tagline">Your devices are stored only in this browser.</p>
     </header>
+
+    <div class="logout"><a href="/logout">Sign out</a></div>
 
     <section class="dash">
       <div class="join-form" style="max-width: none">

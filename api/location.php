@@ -13,6 +13,10 @@ function req_file($dir, $key) { return $dir . '/req_' . sha1($key) . '.json'; }
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    // Reading a location is a parent action — require login.
+    require_once __DIR__ . '/../auth.php';
+    require_api_auth();
+
     $key = isset($_GET['key']) ? (string)$_GET['key'] : '';
     if ($key === '') {
         http_response_code(400);

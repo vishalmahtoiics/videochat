@@ -13,6 +13,10 @@ $WINDOW_MS = 3 * 60 * 1000; // a request stays pending up to 3 minutes
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
+    // Asking the phone to report is a parent action — require login.
+    require_once __DIR__ . '/../auth.php';
+    require_api_auth();
+
     $body = json_decode(file_get_contents('php://input'), true);
     if (!is_array($body)) { $body = []; }
     $key = isset($body['key']) ? (string)$body['key'] : '';
