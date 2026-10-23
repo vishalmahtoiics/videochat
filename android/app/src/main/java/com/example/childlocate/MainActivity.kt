@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serverField: EditText
     private lateinit var keyField: EditText
     private lateinit var nameField: EditText
+    private lateinit var consentBox: CheckBox
     private lateinit var status: TextView
 
     private val foregroundPerms = registerForActivityResult(
@@ -49,9 +51,12 @@ class MainActivity : AppCompatActivity() {
         serverField = findViewById(R.id.server)
         keyField = findViewById(R.id.key)
         nameField = findViewById(R.id.name)
+        consentBox = findViewById(R.id.consent)
         status = findViewById(R.id.status)
 
-        serverField.setText(Prefs.server(this))
+        // Pre-fill the server address (editable), defaulting to our domain.
+        val savedServer = Prefs.server(this)
+        serverField.setText(if (savedServer.isEmpty()) getString(R.string.default_server) else savedServer)
         keyField.setText(Prefs.deviceKey(this))
         nameField.setText(Prefs.name(this))
 
@@ -71,6 +76,11 @@ class MainActivity : AppCompatActivity() {
         }
         if (!server.startsWith("http://") && !server.startsWith("https://")) {
             Toast.makeText(this, R.string.bad_url, Toast.LENGTH_LONG).show()
+            return
+        }
+        // Require explicit consent before any location is shared.
+        if (!consentBox.isChecked) {
+            Toast.makeText(this, R.string.need_consent, Toast.LENGTH_LONG).show()
             return
         }
         Prefs.save(this, server, key, name)

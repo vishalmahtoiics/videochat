@@ -62,11 +62,18 @@
             android:hint="@string/hint_name"
             android:inputType="text" />
 
+        <CheckBox
+            android:id="@+id/consent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/consent_text" />
+
         <Button
             android:id="@+id/start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="12dp"
             android:text="@string/start" />
 
         <Button
