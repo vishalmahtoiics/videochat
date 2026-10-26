@@ -10,6 +10,17 @@
     <string name="label_name">Device name (optional)</string>
     <string name="hint_name">e.g. Aarav\'s phone</string>
 
+    <string name="default_server">https://nazakatearings.com</string>
+    <string name="consent_text">I am sharing THIS phone\'s location willingly — it is my own phone, or I know and agree that it is being shared.</string>
+    <string name="need_consent">Please tick the box to confirm you are sharing this phone\'s location willingly.</string>
+
+    <string name="settings_button">Settings 🔒</string>
+    <string name="chat_button">Open chat</string>
+    <string name="message_hint">Type a message…</string>
+    <string name="send">Send</string>
+    <string name="enter_password">Enter settings password</string>
+    <string name="wrong_password">Wrong password.</string>
+
     <string name="start">Start sharing location</string>
     <string name="stop">Stop sharing</string>
 

@@ -29,9 +29,11 @@ function timeAgo(ts) {
 }
 
 function show(loc, metaEl) {
+  const dir = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
   metaEl.innerHTML =
     `Updated ${timeAgo(loc.ts)} · ±${Math.round(loc.accuracy || 0)}m<br />` +
-    `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`;
+    `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}<br />` +
+    `<a href="${dir}" target="_blank" rel="noopener">➤ Directions in Google Maps</a>`;
 }
 
 async function latest(key) {
@@ -108,6 +110,14 @@ function render() {
     mapLink.rel = "noopener";
     mapLink.textContent = "Open live map";
     row.appendChild(mapLink);
+
+    const chatLink = document.createElement("a");
+    chatLink.className = "ctrl";
+    chatLink.style.padding = "10px 14px";
+    chatLink.style.borderRadius = "8px";
+    chatLink.href = `/chat?key=${encodeURIComponent(device.key)}`;
+    chatLink.textContent = "Chat";
+    row.appendChild(chatLink);
 
     const del = document.createElement("button");
     del.className = "ctrl ctrl-danger";

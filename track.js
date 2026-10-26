@@ -56,9 +56,11 @@ async function poll() {
 
     const age = Math.round((Date.now() - ts) / 1000);
     setState("Location live", "live");
-    updatedEl.textContent = `Last update ${age}s ago · ±${Math.round(
-      accuracy || 0
-    )}m · ${new Date(ts).toLocaleString()}`;
+    const dir = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    updatedEl.innerHTML =
+      `Last update ${age}s ago · ±${Math.round(accuracy || 0)}m · ` +
+      `${new Date(ts).toLocaleString()}<br />` +
+      `<a href="${dir}" target="_blank" rel="noopener">➤ Directions in Google Maps</a>`;
   } catch {
     setState("Connection problem…", "ended");
   }
