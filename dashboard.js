@@ -111,6 +111,14 @@ function render() {
     mapLink.textContent = "Open live map";
     row.appendChild(mapLink);
 
+    const chatLink = document.createElement("a");
+    chatLink.className = "ctrl";
+    chatLink.style.padding = "10px 14px";
+    chatLink.style.borderRadius = "8px";
+    chatLink.href = `/chat?key=${encodeURIComponent(device.key)}`;
+    chatLink.textContent = "Chat";
+    row.appendChild(chatLink);
+
     const del = document.createElement("button");
     del.className = "ctrl ctrl-danger";
     del.textContent = "Remove";

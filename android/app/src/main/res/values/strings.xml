@@ -15,6 +15,9 @@
     <string name="need_consent">Please tick the box to confirm you are sharing this phone\'s location willingly.</string>
 
     <string name="settings_button">Settings 🔒</string>
+    <string name="chat_button">Open chat</string>
+    <string name="message_hint">Type a message…</string>
+    <string name="send">Send</string>
     <string name="enter_password">Enter settings password</string>
     <string name="wrong_password">Wrong password.</string>
 

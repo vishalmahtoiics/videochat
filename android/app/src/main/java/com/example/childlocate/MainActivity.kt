@@ -65,6 +65,9 @@ class MainActivity : AppCompatActivity() {
         keyField.setText(Prefs.deviceKey(this))
         nameField.setText(Prefs.name(this))
 
+        findViewById<Button>(R.id.chat).setOnClickListener {
+            startActivity(android.content.Intent(this, ChatActivity::class.java))
+        }
         findViewById<Button>(R.id.settings).setOnClickListener { promptForSettings() }
         findViewById<Button>(R.id.start).setOnClickListener { onStartClicked() }
         findViewById<Button>(R.id.stop).setOnClickListener { onStopClicked() }
